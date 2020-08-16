@@ -1,7 +1,6 @@
 import {combineReducers} from 'redux';
-import {createSelector} from 'reselect';
-import {history} from './HistoryReducer'
+import {history, date} from './HistoryReducer'
 export default combineReducers({
-    history
+    history,
+    date,
 });
-

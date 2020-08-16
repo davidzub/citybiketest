@@ -1,9 +1,17 @@
-import React, { Component, Fragment } from "react";
+import React, { Component} from "react";
+import { connect } from "react-redux";
 import socketIOClient from "socket.io-client";
 import { Map, TileLayer } from "react-leaflet";
 import GroupMarkersComponent from "./GroupMarkersComponent";
-import AddToHistory from "../actions/Actions";
-
+import AddToHistory, { setDate } from "../actions/Actions";
+import {
+  getHistory,
+  getMarkersDataFromDates,
+} from "../reducers/HistoryReducer";
+import TableComponet from "./TableComponent";
+import Select from "react-select";
+import NoDataComponent from './NoDataComponent'
+import "./style.css";
 class MapComponent extends Component {
   constructor() {
     super();
@@ -13,7 +21,7 @@ class MapComponent extends Component {
       lat: 25.790654,
       lng: -80.1300455,
       zoom: 13,
-      markers: [],
+      valueSelect: null
     };
   }
   componentDidMount() {
@@ -22,6 +30,7 @@ class MapComponent extends Component {
     socket.on("FromAPI", this.socketResponse);
   }
   socketResponse = (data) => {
+    const date = new Date();
     const { stations } = data;
     let newMarkers = [];
     stations.map((element) => {
@@ -33,23 +42,55 @@ class MapComponent extends Component {
         free_bikes: element.free_bikes,
       });
     });
-    this.setState({ markers: newMarkers });
+    this.props.setHistory({ date, markers: newMarkers });
   };
+  handleChange = (value) => {
+    this.setState({valueSelect: value})
+    this.props.setDate(value.value);
+  };
+  handleClick = () =>{
+    this.props.setDate(null);
+    this.setState({valueSelect: null})
+  }
   render() {
-    const { markers } = this.state;
     const position = [this.state.lat, this.state.lng];
-    return (
-        <div className="map">
+    const { dates, getMarkersDataFromDates } = this.props;
+    const data = (getMarkersDataFromDates) ? {markers: getMarkersDataFromDates} : dates.length > 0 ? dates[dates.length - 1] : null;
+
+    return ((data) ? <div>
+        <div className="header">
           <h1> City Bikes in Miami </h1>
-          <Map center={position} zoom={this.state.zoom}>
-            <TileLayer
-              attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            <GroupMarkersComponent list={markers} />
-          </Map>
         </div>
+        <div className="select">
+          <label>History</label>
+          <Select value={this.state.valueSelect} options={dates} onChange={this.handleChange}></Select>
+          <button disabled={(getMarkersDataFromDates) ? false: true} onClick={this.handleClick}>Clear</button>
+        </div>
+        <div className="content">
+          <div className="map">
+            <Map center={position} zoom={this.state.zoom}>
+              <TileLayer
+                attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              <GroupMarkersComponent list={data.markers} />
+            </Map>
+          </div>
+          <div className="content-table">
+            <TableComponet list={data.markers}></TableComponet>
+          </div>
+        </div>
+      </div>: <NoDataComponent/>
+      
     );
   }
 }
-export default MapComponent;
+const mapDispatchToProps = (dispatch) => ({
+  setHistory: (value) => dispatch(AddToHistory(value)),
+  setDate: (value) => dispatch(setDate(value)),
+});
+const mapStateToProps = (state) => ({
+  dates: getHistory(state),
+  getMarkersDataFromDates: getMarkersDataFromDates(state),
+});
+export default connect(mapStateToProps, mapDispatchToProps)(MapComponent);

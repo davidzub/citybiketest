@@ -1,0 +1,55 @@
+.header{
+    text-align: center;
+}
+.select{
+    width: calc(50% - 10px);
+    margin: 20px 0;
+}
+.select label{
+    font-size: 1.2em;
+    font-weight: 600;
+    line-height: 2em;
+}
+.content{
+    display: flex;
+}
+.map{
+    width: 50%;
+    height: 600px;
+}
+.leaflet-container{
+    width: 100% !important;
+}
+.content-table{
+    height: 600px; 
+    overflow-y: scroll;
+    display: block;
+    width: 50%;
+    margin: 0 0 0 20px;
+}
+.table{
+    width: calc(100%);
+    border-collapse: collapse;
+    
+}
+.table td, .table th {
+    border: 1px solid #ddd;
+    padding: 5px 8px;
+    font-size: 0.8em;
+  }
+  
+  .table tr:nth-child(even){background-color: #f2f2f2;}
+  
+  .table tr:hover {background-color: #ddd;}
+  
+  .table th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: center;
+    background-color: #4597D0;
+    color: white;
+    
+  }
+  .noData{
+      text-align: center;
+  }
